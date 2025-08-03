@@ -77,3 +77,28 @@ pipeline {
         }
     }
 }
+pipeline {
+    agent {
+        docker {
+            image 'maven:3.9.6-eclipse-temurin-17'  // Or any Maven+JDK base image
+            args '-v /root/.m2:/root/.m2'  // Optional: persist Maven repo cache
+        }
+    }
+    tools {
+        maven 'maven-3.9.6'
+        jdk 'jdk-17'
+    }
+    stages {
+        stage('Build & Test') {
+            steps {
+                sh 'mvn clean test'
+            }
+        }
+    }
+    post {
+        always {
+            junit 'target/surefire-reports/*.xml'
+            archiveArtifacts artifacts: '**/target/*.jar', allowEmptyArchive: true
+        }
+    }
+}
